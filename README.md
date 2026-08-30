@@ -54,3 +54,13 @@ application-monitoring-incident-management/
 ├── .gitignore
 ├── requirements.txt
 └── README.md
+
+## Dashboard Screenshots
+
+### Application UP
+
+![Application UP](screenshots/dashboard-up.png)
+
+### Application DOWN
+
+![Application DOWN](screenshots/dashboard-down.png)
