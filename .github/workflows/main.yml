@@ -43,7 +43,7 @@ jobs:
 
       - name: Start Flask dashboard
         run: |
-          PYTHONPATH=. python app/app.py > flask.log 2>&1 &
+          PYTHONPATH=. python -m app.app > flask.log 2>&1 &
           sleep 5
 
       - name: Test monitoring endpoint
