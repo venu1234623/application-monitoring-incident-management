@@ -21,19 +21,30 @@ jobs:
           pip install -r requirements.txt
           pip install pytest requests
 
+      - name: Initialize database
+        run: |
+          PYTHONPATH=. python -c "from app.database.database import create_database; create_database()"
+
+      - name: Start health server
+        run: |
+          PYTHONPATH=. python app/monitoring/health_server.py > health.log 2>&1 &
+          sleep 5
+
       - name: Run automated tests
+        env:
+          PYTHONPATH: .
         run: |
           pytest -v
-
-      - name: Start Flask application
-        run: |
-          python app/app.py > flask.log 2>&1 &
-          sleep 5
 
       - name: Test health endpoint
         run: |
           echo "=== HEALTH ENDPOINT ==="
           curl -i http://127.0.0.1:9999/health
+
+      - name: Start Flask dashboard
+        run: |
+          PYTHONPATH=. python app/app.py > flask.log 2>&1 &
+          sleep 5
 
       - name: Test monitoring endpoint
         run: |
@@ -49,8 +60,15 @@ jobs:
               http://127.0.0.1:9999/health
           done
 
-      - name: Show Flask log
+      - name: Count incident records
+        run: |
+          echo "=== INCIDENT DATABASE ==="
+          PYTHONPATH=. python -c "import sqlite3; c=sqlite3.connect('incidents.db'); print('Incident records:', c.execute('SELECT COUNT(*) FROM incidents').fetchone()[0]); print('Records:', c.execute('SELECT * FROM incidents').fetchall()); c.close()"
+
+      - name: Show logs
         if: always()
         run: |
+          echo "=== HEALTH SERVER LOG ==="
+          cat health.log || true
           echo "=== FLASK LOG ==="
           cat flask.log || true
